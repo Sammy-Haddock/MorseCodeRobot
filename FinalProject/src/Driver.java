@@ -14,18 +14,13 @@ import lejos.robotics.navigation.MovePilot;
 import lejos.hardware.sensor.NXTSoundSensor;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
-import lejos.utility.Delay;
 
 public class Driver {
     public static void main(String[] args) {
-    	LCD.drawString("Welcome to Our Morse Code Robot!", 0, 0);
-    	LCD.drawString("Authors: Samuel Haddock, Yash Kumar", 0, 1);
-    	LCD.drawString("Yash Kumar", 0, 2);
-    	LCD.drawString("and Miski Hussein", 0, 3);
-    	LCD.drawString("Version: 1.0", 0, 4);
-    	LCD.drawString("Press Enter button to continue...", 0, 5);
-
-
+        System.out.println("Welcome to Our Morse Code Robot!");
+        System.out.println("Authors: Samuel Haddock, Yash Kumar and Miski Hussein");
+        System.out.println("Version: 1.0");
+        System.out.println("Press Enter button to continue...");
         Button.ENTER.waitForPress();
 
         final BaseRegulatedMotor mL = new EV3LargeRegulatedMotor(MotorPort.A);
@@ -36,12 +31,8 @@ public class Driver {
         // Initialise the sound sensor
         NXTSoundSensor soundSensor = new NXTSoundSensor(SensorPort.S2);
         SampleProvider soundMode = soundSensor.getDBAMode();
-        
+
         squareCommand(mL, mR);
-        circleCommand(mL, mR);
-        
-        mL.close();
-        mR.close();
 
         /*Behavior forwardBehavior = new Trundle(pilot);
         Behavior avoidWallBehavior = new Backup(SensorPort.S3, pilot);
@@ -60,7 +51,6 @@ public class Driver {
     }
 
     public static void squareCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) { // Fixed method name
-    	LCD.drawString("Running square command...", 0, 0);
         final float WHEEL_DIAMETER = 56;
         final float AXLE_LENGTH = 44;
         final float ANGULAR_SPEED = 200;
@@ -80,37 +70,42 @@ public class Driver {
             pilot.travel(500);
             pilot.rotate(275); // Changed the angle to make a square
         }
+
+        // Close motor ports to release resources
+        mL.close();
+        mR.close();
     }
 
-    public static void circleCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) {
-    	mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
-    	mL.setSpeed(720);
-		mR.setSpeed(720);
-		
-		for (int i = 0; i < 4; i++) {
-			mL.rotate(360); 
-			mL.startSynchronization();
-			
-			mL.rotate(360);
-			mR.rotate(360);
-			
-			mL.endSynchronization();
-			mL.waitComplete();
-			mR.waitComplete();
-		}
-		
-		mL.close();
-		mR.close();
+    public void circleCommand() {
 
     }
 
-    public void freeRoamCommand() {
-    	LCD.drawString("Running free roam command...", 0, 0);
+    public static void freeRoamCommand(MovePilot pilot, SoundDetection soundDetection, Behaviour Backup) {
+        long startTime = System.currentTimeMillis();
+        Random random = new Random();
+        
+        pilot.forward();
 
+        while (System.currentTimeMillis() - startTime < 60000) {
+            if (Backup.takeControl()) {
+                Backup.action(); //if obstacle detected, execute backup action
+            }
+    
+            //check for morse code signals
+            float[] soundLevel = new float[soundDetection.sampleSize()];
+            soundDetection.fetchSample(soundLevel, 0);
+            if (soundLevel[0] > 0) {
+                // random roaming based on Morse code signals
+                if (random.nextBoolean()) {
+                    pilot.rotate(-90);
+                } else {
+                    pilot.rotate(90);
+                }
+            }
+        }
     }
 
     public void danceCommand() {
-    	LCD.drawString("Running dance command...", 0, 0);
 
     }
 }
