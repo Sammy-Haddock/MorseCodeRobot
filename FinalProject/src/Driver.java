@@ -83,28 +83,31 @@ public class Driver {
     }
 
     public static void circleCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) {
-    	mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
-    	mL.setSpeed(720);
-		mR.setSpeed(720);
-		  while (!Button.ENTER.isDown()) {	  
-			  for (int i = 0; i < 4; i++) {
-				  if(Button.ENTER.isDown()) {
-					  break;
-				  }
-				  mL.rotate(360); 
-				  mL.startSynchronization();
-				  
-				  mL.rotate(360);
-				  mR.rotate(360);
-				  
-				  mL.endSynchronization();
-				  mL.waitComplete();
-				  mR.waitComplete();
-			  }
-			  mL.close();
-			  mR.close();
-			  break;
-		  }
+	    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
+	    mL.setSpeed(720);
+	    mR.setSpeed(180);
+	    
+	    while (!Button.ENTER.isDown()) {
+		    for (int i = 0; i < 2; i++) {
+			    if(Button.ENTER.isDown()) {
+				    break;
+			    }
+			    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
+			    mL.forward();
+			    mL.rotate(360); 
+			    mL.startSynchronization();
+			    
+			    mL.rotate(360);
+			    mR.rotate(360);
+			    
+			    mL.endSynchronization();
+			    mL.waitComplete();
+			    mR.waitComplete();
+		    }
+		    mL.close();
+		    mR.close();
+		    break;
+	    }
     }
 
     public static void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot ) {
