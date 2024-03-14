@@ -142,27 +142,22 @@ public class Driver {
 				
 			mL.forward();
 			mR.forward();
-			Delay.msDelay(2000);
-					
+						
 			mL.rotate(720);
 			mR.rotate(720);
-			Delay.msDelay(2000);
 				
 			mL.backward();
 			mR.forward();
-			Delay.msDelay(2000);
 						
 			mL.forward();
 			mR.forward();
-			Delay.msDelay(900);
 			
 			mL.rotate(540);
 			mR.rotate(360);
-			Delay.msDelay(2000);
 						
 			mL.rotate(720);
 			mR.rotate(1080);
-			Delay.msDelay(2000);
+
 			
 			mL.endSynchronization();
 			mL.waitComplete();
