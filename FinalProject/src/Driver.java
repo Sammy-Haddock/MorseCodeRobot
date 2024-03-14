@@ -86,22 +86,23 @@ public class Driver {
     	mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
     	mL.setSpeed(720);
 		mR.setSpeed(720);
-		
-		for (int i = 0; i < 4; i++) {
-			mL.rotate(360); 
-			mL.startSynchronization();
-			
-			mL.rotate(360);
-			mR.rotate(360);
-			
-			mL.endSynchronization();
-			mL.waitComplete();
-			mR.waitComplete();
-		}
-		
-		mL.close();
-		mR.close();
-
+		  while (!Button.ENTER.isDown()) {
+			  
+			  for (int i = 0; i < 4; i++) {
+				  mL.rotate(360); 
+				  mL.startSynchronization();
+				  
+				  mL.rotate(360);
+				  mR.rotate(360);
+				  
+				  mL.endSynchronization();
+				  mL.waitComplete();
+				  mR.waitComplete();
+			  }
+			  mL.close();
+			  mR.close();
+			  break;
+		  }
     }
 
     public static void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot ) {
@@ -130,44 +131,43 @@ public class Driver {
     }
 
     public static void danceCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) {
-    	LCD.drawString("Running dance command...", 0, 0);
-	
-		mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
-		mL.setSpeed(600);
-		mR.setSpeed(600);
-		    
-		for (int i = 0; i < 3; i++) {
-			mL.rotate(360); 
-			mL.startSynchronization();
-				
-			mL.forward();
-			mR.forward();
-						
-			mL.rotate(720);
-			mR.rotate(720);
-				
-			mL.backward();
-			mR.forward();
-						
-			mL.forward();
-			mR.forward();
-			
-			mL.rotate(540);
-			mR.rotate(360);
-						
-			mL.rotate(720);
-			mR.rotate(1080);
-
-			
-			mL.endSynchronization();
-			mL.waitComplete();
-			mR.waitComplete();
-		}
-			
-		mL.close();
-		mR.close();
-		}
+	    LCD.drawString("Running dance command...", 0, 0);
+	    
+	    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
+	    mL.setSpeed(600);
+	    mR.setSpeed(600);
+	    
+	    while (!Button.ENTER.isDown()) {
+		    for (int i = 0; i < 3; i++) {
+			    mL.rotate(360); 
+			    mL.startSynchronization();
+			    
+			    mL.forward();
+			    mR.forward();
+			    
+			    mL.rotate(720);
+			    mR.rotate(720);
+			    
+			    mL.backward();
+			    mR.forward();				
+			    
+			    mL.forward();
+			    mR.forward();
+			    
+			    mL.rotate(540);
+			    mR.rotate(360);
+			    
+			    mL.rotate(720);
+			    mR.rotate(1080);
+			    
+			    mL.endSynchronization();
+			    mL.waitComplete();
+			    mR.waitComplete();
+		    }	
+		    mL.close();
+		    mR.close();
+		    break;
+	    }
+    }
 }
-
-
 
