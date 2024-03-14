@@ -10,8 +10,8 @@ import java.util.HashMap;
 
 public class TestMorseCode {
     public static void main(String[] args) throws InterruptedException {
-    	final HashMap<String, String> morseAlphabet = new HashMap<>();
-    	morseAlphabet.put(".-", "A");
+        final HashMap<String, String> morseAlphabet = new HashMap<>();
+        morseAlphabet.put(".-", "A");
         morseAlphabet.put("-...", "B");
         morseAlphabet.put("-.-.", "C");
         morseAlphabet.put("-..", "D");
@@ -46,54 +46,58 @@ public class TestMorseCode {
         SoundDetection clap = new SoundDetection(sound, 0.6f, 200, 500);
 
         float[] level = new float[1];
-        StringBuilder morseList = new StringBuilder(); // List to store dots and dashes
+        StringBuilder morseWord = new StringBuilder(); // List to store dots and dashes
         ArrayList<String> letterList = new ArrayList<>();
 
         boolean dashInProgress = false; // Track whether a dash is in progress
         System.out.print("Morse Code Heard:");
         while (true) {
             if (Button.ESCAPE.isDown()) {
-            	break;
+                break;
             }
 
             clap.fetchSample(level, 0);
             if (Button.ENTER.isDown()){
                 // If no sound is detected for 3 seconds, save all the dots and dashes as a word
                 for(String key : morseAlphabet.keySet()) {
-                	if(morseAlphabet.get(key) == morseList.toString()) {
-                		letterList.add(key);
-                	}
+                    if(key.equals(morseWord.toString())) {
+                        letterList.add(morseAlphabet.get(key));
+                    }
                 }
-                morseList.setLength(0); // Clear the list for the next word
+
+                for(String letter : letterList) {
+                    System.out.print(letter);
+                }
+                morseWord.setLength(0); // Clear the list for the next word
             }
 
             if (level[0] == 1.0) {
                 // Single clap (potential dot)
-                Thread.sleep(300); // Wait for potential second clap within dash time gap
+                Thread.sleep(500); // Wait for potential second clap within dash time gap
                 clap.fetchSample(level, 0); // Fetch sample again
                 if (level[0] == 2.0) {
-                    morseList.append("-"); // Add dash to list
+                	morseWord.append("-"); // Add dash to list
+                    System.out.print("-");
                     dashInProgress = true; // Set dash in progress when a dash is detected
                 } else {
-                    morseList.append("."); // Add dot to list
+                	morseWord.append("."); // Add dot to list
+                    System.out.print(".");
                     dashInProgress = false; // Reset dash in progress
                 }
             } else if (level[0] == 2.0 && !dashInProgress) {
                 // Only detect dash if not already in progress
-                morseList.append("-"); // Add dash to list
+            	morseWord.append("-"); // Add dash to list
+                System.out.print("-");
                 dashInProgress = true; // Set dash in progress when a dash is detected
             } else {
                 dashInProgress = false; // Reset dash in progress if no clap is detected
             }
-            
-       
         }
-        for(String letter : letterList) {
-        	System.out.print(letter);
-        }
-        
+
         mLeft.close();
         mRight.close();
     }
-
 }
+
+
+

@@ -18,6 +18,21 @@ import lejos.utility.Delay;
 
 public class Driver {
     public static void main(String[] args) {
+        final float WHEEL_DIAMETER = 56;
+        final float AXLE_LENGTH = 44;
+        final float ANGULAR_SPEED = 200;
+        final float LINEAR_SPEED = 200;
+        final BaseRegulatedMotor mL = new EV3LargeRegulatedMotor(MotorPort.A);
+        final BaseRegulatedMotor mR = new EV3LargeRegulatedMotor(MotorPort.B);
+
+        Wheel wLeft = WheeledChassis.modelWheel(mL, WHEEL_DIAMETER).offset(-AXLE_LENGTH / 2);
+        Wheel wRight = WheeledChassis.modelWheel(mR, WHEEL_DIAMETER).offset(AXLE_LENGTH / 2);
+
+        Wheel[] wheels = new Wheel[] {wRight, wLeft}; // Corrected the order of wheels
+
+        WheeledChassis chassis = new WheeledChassis(wheels, WheeledChassis.TYPE_DIFFERENTIAL);
+        MovePilot pilot = new MovePilot(chassis);
+        
     	LCD.drawString("Welcome to Our Morse Code Robot!", 0, 0);
     	LCD.drawString("Authors: Samuel Haddock, Yash Kumar", 0, 1);
     	LCD.drawString("Yash Kumar", 0, 2);
@@ -25,11 +40,7 @@ public class Driver {
     	LCD.drawString("Version: 1.0", 0, 4);
     	LCD.drawString("Press Enter button to continue...", 0, 5);
 
-
         Button.ENTER.waitForPress();
-
-        final BaseRegulatedMotor mL = new EV3LargeRegulatedMotor(MotorPort.A);
-        final BaseRegulatedMotor mR = new EV3LargeRegulatedMotor(MotorPort.B);
 
         LCD.clear();
 
@@ -37,8 +48,10 @@ public class Driver {
         NXTSoundSensor soundSensor = new NXTSoundSensor(SensorPort.S2);
         SampleProvider soundMode = soundSensor.getDBAMode();
         
-        squareCommand(mL, mR);
-        circleCommand(mL, mR);
+        squareCommand(mL, mR, pilot, LINEAR_SPEED, LINEAR_SPEED);
+        freeRoamCommand(mR, mR, pilot);
+        //circleCommand(mL, mR);
+        //danceCommand(mL, mR);
         
         mL.close();
         mR.close();
@@ -59,21 +72,8 @@ public class Driver {
         soundSensor.close();*/
     }
 
-    public static void squareCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) { // Fixed method name
+    public static void squareCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot, float ANGULAR_SPEED, float LINEAR_SPEED) { // Fixed method name
     	LCD.drawString("Running square command...", 0, 0);
-        final float WHEEL_DIAMETER = 56;
-        final float AXLE_LENGTH = 44;
-        final float ANGULAR_SPEED = 200;
-        final float LINEAR_SPEED = 200;
-
-        Wheel wLeft = WheeledChassis.modelWheel(mL, WHEEL_DIAMETER).offset(-AXLE_LENGTH / 2);
-        Wheel wRight = WheeledChassis.modelWheel(mR, WHEEL_DIAMETER).offset(AXLE_LENGTH / 2);
-
-        Wheel[] wheels = new Wheel[] {wRight, wLeft}; // Corrected the order of wheels
-
-        WheeledChassis chassis = new WheeledChassis(wheels, WheeledChassis.TYPE_DIFFERENTIAL);
-        MovePilot pilot = new MovePilot(chassis);
-
         for (int side = 0; side < 4; side++) {
             pilot.setAngularSpeed(ANGULAR_SPEED);
             pilot.setLinearSpeed(LINEAR_SPEED);
@@ -104,13 +104,16 @@ public class Driver {
 
     }
 
-    public void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, NXTSoundSensor soundSensor) {
+    public static void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot ) {
     	Behavior backupBehavior = new Backup(SensorPort.S3, pilot);
 	
-	long startTime = System.currentTimeMillis();
+    	long startTime = System.currentTimeMillis();
         long elapsedTime = 0;
 
         while (elapsedTime < 60000) {
+        	if(Button.ENTER.isDown()) {
+        		break;
+        	}
             if (backupBehavior.takeControl()) {
                 backupBehavior.action();
             } else {
@@ -120,56 +123,55 @@ public class Driver {
             elapsedTime = System.currentTimeMillis() - startTime;
         }
         
-	pilot.stop();
+        pilot.stop();
 
         mL.close();
         mR.close();
-        soundSensor.close();
     }
 
-    public void danceCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) {
+    public static void danceCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) {
     	LCD.drawString("Running dance command...", 0, 0);
 	
-	mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
-	mL.setSpeed(600);
-	mR.setSpeed(600);
-	    
-	for (int i = 0; i < 3; i++) {
-		mL.rotate(360); 
-		mL.startSynchronization();
-			
-		mL.forward();
-		mR.forward();
-		Delay.msDelay(2000);
+		mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
+		mL.setSpeed(600);
+		mR.setSpeed(600);
+		    
+		for (int i = 0; i < 3; i++) {
+			mL.rotate(360); 
+			mL.startSynchronization();
 				
-		mL.rotate(720);
-		mR.rotate(720);
-		Delay.msDelay(2000);
+			mL.forward();
+			mR.forward();
+			Delay.msDelay(2000);
+					
+			mL.rotate(720);
+			mR.rotate(720);
+			Delay.msDelay(2000);
+				
+			mL.backward();
+			mR.forward();
+			Delay.msDelay(2000);
+						
+			mL.forward();
+			mR.forward();
+			Delay.msDelay(900);
 			
-		mL.backward();
-		mR.forward();
-		Delay.msDelay(2000);
-					
-		mL.forward();
-		mR.forward();
-		Delay.msDelay(900);
-		
-		mL.rotate(540);
-		mR.rotate(360);
-		Delay.msDelay(2000);
-					
-		mL.rotate(720);
-		mR.rotate(1080);
-		Delay.msDelay(2000);
-		
-		mL.endSynchronization();
-		mL.waitComplete();
-		mR.waitComplete();
-	}
-		
-	mL.close();
-	mR.close();
-    }
+			mL.rotate(540);
+			mR.rotate(360);
+			Delay.msDelay(2000);
+						
+			mL.rotate(720);
+			mR.rotate(1080);
+			Delay.msDelay(2000);
+			
+			mL.endSynchronization();
+			mL.waitComplete();
+			mR.waitComplete();
+		}
+			
+		mL.close();
+		mR.close();
+		}
 }
 
 
