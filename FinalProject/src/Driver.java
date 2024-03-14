@@ -104,14 +104,71 @@ public class Driver {
 
     }
 
-    public void freeRoamCommand() {
-    	LCD.drawString("Running free roam command...", 0, 0);
+    public void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, NXTSoundSensor soundSensor) {
+    	Behavior backupBehavior = new Backup(SensorPort.S3, pilot);
+	
+	long startTime = System.currentTimeMillis();
+        long elapsedTime = 0;
 
+        while (elapsedTime < 60000) {
+            if (backupBehavior.takeControl()) {
+                backupBehavior.action();
+            } else {
+                pilot.forward();
+            }
+
+            elapsedTime = System.currentTimeMillis() - startTime;
+        }
+        
+	pilot.stop();
+
+        mL.close();
+        mR.close();
+        soundSensor.close();
     }
 
-    public void danceCommand() {
+    public void danceCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) {
     	LCD.drawString("Running dance command...", 0, 0);
-
+	
+	mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
+	mL.setSpeed(600);
+	mR.setSpeed(600);
+	    
+	for (int i = 0; i < 3; i++) {
+		mL.rotate(360); 
+		mL.startSynchronization();
+			
+		mL.forward();
+		mR.forward();
+		Delay.msDelay(2000);
+				
+		mL.rotate(720);
+		mR.rotate(720);
+		Delay.msDelay(2000);
+			
+		mL.backward();
+		mR.forward();
+		Delay.msDelay(2000);
+					
+		mL.forward();
+		mR.forward();
+		Delay.msDelay(900);
+		
+		mL.rotate(540);
+		mR.rotate(360);
+		Delay.msDelay(2000);
+					
+		mL.rotate(720);
+		mR.rotate(1080);
+		Delay.msDelay(2000);
+		
+		mL.endSynchronization();
+		mL.waitComplete();
+		mR.waitComplete();
+	}
+		
+	mL.close();
+	mR.close();
     }
 }
 
