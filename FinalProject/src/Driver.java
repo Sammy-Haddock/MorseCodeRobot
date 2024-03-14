@@ -164,6 +164,24 @@ public class Driver {
 			    
 			    mL.rotate(720);
 			    mR.rotate(1080);
+
+			    mL.forward();
+			    mR.backward();
+
+			     mL.rotate(600);
+			    mR.rotate(900);
+
+			    mL.forward();
+			    mR.backward();
+			    
+			    mL.rotate(1080);
+			    mR.rotate(540);
+
+			    mL.rotate(720);
+			    mR.rotate(1080);
+			    
+			    mL.backward();
+			    mR.forward();
 			    
 			    mL.endSynchronization();
 			    mL.waitComplete();
