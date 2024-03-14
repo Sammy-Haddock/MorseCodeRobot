@@ -93,7 +93,7 @@ public class TestMorseCode {
                 dashInProgress = false; // Reset dash in progress if no clap is detected
             }
         }
-
+        
         mLeft.close();
         mRight.close();
     }
