@@ -48,21 +48,16 @@ public class TestMorseCode {
         float[] level = new float[1];
         StringBuilder morseList = new StringBuilder(); // List to store dots and dashes
         ArrayList<String> letterList = new ArrayList<>();
-        long lastSoundTime = System.currentTimeMillis(); // Track the time of the last sound
 
         boolean dashInProgress = false; // Track whether a dash is in progress
         System.out.print("Morse Code Heard:");
         while (true) {
-            if (Button.ENTER.isDown()) {
-                break;
+            if (Button.ESCAPE.isDown()) {
+            	break;
             }
 
             clap.fetchSample(level, 0);
-            if (level[0] != 0) {
-                lastSoundTime = System.currentTimeMillis(); // Update the time of the last sound
-            }
-
-            if (System.currentTimeMillis() - lastSoundTime > 2000) {
+            if (Button.ENTER.isDown()){
                 // If no sound is detected for 3 seconds, save all the dots and dashes as a word
                 for(String key : morseAlphabet.keySet()) {
                 	if(morseAlphabet.get(key) == morseList.toString()) {
@@ -91,11 +86,12 @@ public class TestMorseCode {
                 dashInProgress = false; // Reset dash in progress if no clap is detected
             }
             
-            for(String letter : letterList) {
-            	System.out.print(letter);
-            }         
+       
         }
-
+        for(String letter : letterList) {
+        	System.out.print(letter);
+        }
+        
         mLeft.close();
         mRight.close();
     }
