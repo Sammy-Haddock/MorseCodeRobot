@@ -48,10 +48,10 @@ public class Driver {
         NXTSoundSensor soundSensor = new NXTSoundSensor(SensorPort.S2);
         SampleProvider soundMode = soundSensor.getDBAMode();
         
-        squareCommand(mL, mR, pilot, LINEAR_SPEED, LINEAR_SPEED);
-        freeRoamCommand(mR, mR, pilot);
+        //squareCommand(mL, mR, pilot, LINEAR_SPEED, LINEAR_SPEED);
+        //freeRoamCommand(mR, mR, pilot);
         //circleCommand(mL, mR);
-        //danceCommand(mL, mR);
+        danceCommand(mL, mR);
         
         mL.close();
         mR.close();
@@ -86,9 +86,11 @@ public class Driver {
     	mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
     	mL.setSpeed(720);
 		mR.setSpeed(720);
-		  while (!Button.ENTER.isDown()) {
-			  
+		  while (!Button.ENTER.isDown()) {	  
 			  for (int i = 0; i < 4; i++) {
+				  if(Button.ENTER.isDown()) {
+					  break;
+				  }
 				  mL.rotate(360); 
 				  mL.startSynchronization();
 				  
@@ -139,6 +141,9 @@ public class Driver {
 	    
 	    while (!Button.ENTER.isDown()) {
 		    for (int i = 0; i < 3; i++) {
+		    	if(Button.ENTER.isDown()) {
+		    		break;
+		    	}
 			    mL.rotate(360); 
 			    mL.startSynchronization();
 			    
