@@ -180,7 +180,7 @@ public class Driver {
 	    mR.setSpeed(180);
 	    
 	    while (!Button.ENTER.isDown()) {
-		    for (int i = 0; i < 2; i++) {
+		    for (int i = 0; i < 20; i++) {
 			    if(Button.ENTER.isDown()) {
 				    break;
 			    }
