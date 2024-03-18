@@ -38,9 +38,6 @@ public class TestMorseCode {
         morseAlphabet.put("-.--", "Y");
         morseAlphabet.put("--..", "Z");
 
-        BaseRegulatedMotor mLeft = new EV3LargeRegulatedMotor(MotorPort.A);
-        BaseRegulatedMotor mRight = new EV3LargeRegulatedMotor(MotorPort.B);
-
         NXTSoundSensor ss = new NXTSoundSensor(SensorPort.S2);
         SensorMode sound = (SensorMode) ss.getDBAMode();
         SoundDetection clap = new SoundDetection(sound, 0.6f, 200, 500);
@@ -61,19 +58,21 @@ public class TestMorseCode {
                 // If no sound is detected for 3 seconds, save all the dots and dashes as a word
                 for(String key : morseAlphabet.keySet()) {
                     if(key.equals(morseWord.toString())) {
+                    	
+                    	
                         letterList.add(morseAlphabet.get(key));
                     }
                 }
 
-                for(String letter : letterList) {
-                    System.out.print(letter);
+                for(int i = 0; i < letterList.size(); i++) {
+                    System.out.print(letterList.get(i));
                 }
                 morseWord.setLength(0); // Clear the list for the next word
             }
 
             if (level[0] == 1.0) {
                 // Single clap (potential dot)
-                Thread.sleep(500); // Wait for potential second clap within dash time gap
+                Thread.sleep(300); // Wait for potential second clap within dash time gap
                 clap.fetchSample(level, 0); // Fetch sample again
                 if (level[0] == 2.0) {
                 	morseWord.append("-"); // Add dash to list
@@ -93,9 +92,6 @@ public class TestMorseCode {
                 dashInProgress = false; // Reset dash in progress if no clap is detected
             }
         }
-        
-        mLeft.close();
-        mRight.close();
     }
 }
 
