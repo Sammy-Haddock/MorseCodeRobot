@@ -141,6 +141,9 @@ public class Driver {
         else if(strCommandWord == "d") {
         	danceCommand(mL, mR);
         }
+        else {
+        	System.out.print("No Command found!");
+        }
         
         mL.close();
         mR.close();
