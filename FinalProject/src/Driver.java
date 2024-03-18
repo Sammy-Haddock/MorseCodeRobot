@@ -87,7 +87,7 @@ public class Driver {
         boolean dashInProgress = false; // Track whether a dash is in progress
         System.out.print("Morse Code Heard:");
         while (true) {
-            if (Button.ESCAPE.isDown()) {
+            if (Button.DOWN.isDown()) {
                 break;
             }
 
@@ -102,6 +102,7 @@ public class Driver {
 
                 System.out.print(commandWord);
                 morseWord.setLength(0); // Clear the list for the next word
+                Thread.sleep(1000);
             }
 
             if (level[0] == 1.0) {
@@ -127,24 +128,27 @@ public class Driver {
             }
         }
         
-        String strCommandWord = commandWord.toString();
+        circleCommand(mL, mR);
+	    String strCommandWord = commandWord.toString();
+	    System.out.print(strCommandWord);
+	    
+	    if(strCommandWord.equals("S")) {
+	    	squareCommand(mL, mR, pilot, ANGULAR_SPEED, LINEAR_SPEED);
+	    }
+	    else if(strCommandWord.equals("F")) {
+	        freeRoamCommand(mR, mR, pilot);
+	    }
+	    else if(strCommandWord.equals("C")) {
+	        circleCommand(mL, mR);
+	    }
+	    else if(strCommandWord.equals("D")) {
+	        danceCommand(mL, mR);
+	    }
+	    else {
+	    	System.out.print("No Command found!");
+        }
         
-        if(strCommandWord == "s") {
-        	squareCommand(mL, mR, pilot, LINEAR_SPEED, LINEAR_SPEED);
-        }
-        else if(strCommandWord == "f") {
-        	freeRoamCommand(mR, mR, pilot);
-        }
-        else if(strCommandWord == "c") {
-        	circleCommand(mL, mR);
-        }
-        else if(strCommandWord == "d") {
-        	danceCommand(mL, mR);
-        }
-        else {
-        	System.out.print("No Command found!");
-        }
-        
+	    Thread.sleep(3000);
         mL.close();
         mR.close();
 
@@ -180,17 +184,15 @@ public class Driver {
 	    mR.setSpeed(180);
 	    
 	    while (!Button.ENTER.isDown()) {
-		    for (int i = 0; i < 20; i++) {
+		    
 			    if(Button.ENTER.isDown()) {
 				    break;
 			    }
 			    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
-			    mL.forward();
-			    mL.rotate(360); 
 			    mL.startSynchronization();
 			    
-			    mL.rotate(360);
-			    mR.rotate(360);
+			    mL.forward();
+			    mR.forward(); 
 			    
 			    mL.endSynchronization();
 			    mL.waitComplete();
@@ -198,8 +200,6 @@ public class Driver {
 		    }
 		    mL.close();
 		    mR.close();
-		    break;
-	    }
     }
 
     public static void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot ) {
