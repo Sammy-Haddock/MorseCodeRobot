@@ -184,22 +184,23 @@ public class Driver {
 	    mR.setSpeed(180);
 	    
 	    while (!Button.ENTER.isDown()) {
-		    
-			    if(Button.ENTER.isDown()) {
-				    break;
-			    }
-			    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
-			    mL.startSynchronization();
-			    
-			    mL.forward();
-			    mR.forward(); 
-			    
-			    mL.endSynchronization();
-			    mL.waitComplete();
-			    mR.waitComplete();
+		    if(Button.ENTER.isDown()) {
+			    break;
 		    }
-		    mL.close();
-		    mR.close();
+		    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
+		    mL.startSynchronization();
+		    mL.forward();
+		    mR.forward();
+		    mL.rotate(2880);
+		    mR.rotate(720);
+		    
+		    mL.endSynchronization();
+		    mL.waitComplete();
+		    mR.waitComplete();
+	    }
+	    break;
+	    mL.close();
+	    mR.close();
     }
 
     public static void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot ) {
