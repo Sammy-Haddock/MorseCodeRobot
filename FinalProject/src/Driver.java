@@ -189,14 +189,13 @@ public class Driver {
 		    }
 		    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
 		    mL.startSynchronization();
+		    
 		    mL.forward();
 		    mR.forward();
-		    mL.rotate(2880);
-		    mR.rotate(720);
 		    
 		    mL.endSynchronization();
-		    mL.waitComplete();
-		    mR.waitComplete();
+		    mL.stop();
+		    mR.stop();
 	    }
 	    mL.close();
 	    mR.close();
