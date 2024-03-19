@@ -90,7 +90,8 @@ public class Driver {
             if (Button.DOWN.isDown()) {
                 break;
             }
-
+                      
+        	
             clap.fetchSample(level, 0);
             if (Button.ENTER.isDown()){
                 // If no sound is detected for 3 seconds, save all the dots and dashes as a word
@@ -111,24 +112,23 @@ public class Driver {
                 clap.fetchSample(level, 0); // Fetch sample again
                 if (level[0] == 2.0) {
                 	morseWord.append("-"); // Add dash to list
-                    System.out.print("-");
+                	LCD.drawString(morseWord.toString(), 0, 1);                  
                     dashInProgress = true; // Set dash in progress when a dash is detected
                 } else {
                 	morseWord.append("."); // Add dot to list
-                    System.out.print(".");
+                	LCD.drawString(morseWord.toString(), 0, 1);                   
                     dashInProgress = false; // Reset dash in progress
-                }
+                } 
             } else if (level[0] == 2.0 && !dashInProgress) {
                 // Only detect dash if not already in progress
             	morseWord.append("-"); // Add dash to list
-                System.out.print("-");
+            	LCD.drawString(morseWord.toString(), 0, 1);                
                 dashInProgress = true; // Set dash in progress when a dash is detected
             } else {
                 dashInProgress = false; // Reset dash in progress if no clap is detected
             }
         }
         
-        circleCommand(mL, mR);
 	    String strCommandWord = commandWord.toString();
 	    System.out.print(strCommandWord);
 	    
@@ -198,7 +198,6 @@ public class Driver {
 		    mL.waitComplete();
 		    mR.waitComplete();
 	    }
-	    break;
 	    mL.close();
 	    mR.close();
     }
