@@ -85,13 +85,22 @@ public class Driver {
         StringBuilder commandWord = new StringBuilder();
 
         boolean dashInProgress = false; // Track whether a dash is in progress
-        System.out.print("Morse Code Heard:");
+        LCD.drawString("Morse Code Heard:", 0, 0);
         while (true) {
             if (Button.DOWN.isDown()) {
                 break;
             }
-                      
-        	
+            
+            if (Button.UP.isDown()) { 
+            	if (morseWord.length() > 0) { 
+            		morseWord.setLength(morseWord.length()-2);
+            		LCD.clear();
+            		LCD.drawString("Morse Code Heard:", 0, 0);
+                    LCD.drawString(commandWord.toString(),0,2);
+                    LCD.drawString(morseWord.toString(), 0, 1);
+            	}
+            }
+                              	
             clap.fetchSample(level, 0);
             if (Button.ENTER.isDown()){
                 // If no sound is detected for 3 seconds, save all the dots and dashes as a word
@@ -100,9 +109,12 @@ public class Driver {
                     	commandWord.append(morseAlphabet.get(key));
                     }
                 }
-
-                System.out.print(commandWord);
-                morseWord.setLength(0); // Clear the list for the next word
+                
+                LCD.clear();
+                morseWord.setLength(0);// Clear the list for the next word
+                LCD.drawString("Morse Code Heard:", 0, 0);
+                LCD.drawString(commandWord.toString(),0,2);
+                LCD.drawString(morseWord.toString(), 0, 1);
                 Thread.sleep(1000);
             }
 
@@ -111,18 +123,33 @@ public class Driver {
                 Thread.sleep(300); // Wait for potential second clap within dash time gap
                 clap.fetchSample(level, 0); // Fetch sample again
                 if (level[0] == 2.0) {
-                	morseWord.append("-"); // Add dash to list
-                	LCD.drawString(morseWord.toString(), 0, 1);                  
-                    dashInProgress = true; // Set dash in progress when a dash is detected
+                	int length = morseWord.length();
+                	if(length > 1) {
+                		morseWord.setLength(0);
+	                	morseWord.append("-"); // Add dash to list
+	                	LCD.drawString(morseWord.toString(), 0, 1);
+                	}
+	                else {
+	                		morseWord.replace(length,length+1,"-");
+	                		LCD.drawString(morseWord.toString(), 0, 1);
+	                }
+	                dashInProgress = true; // Set dash in progress when a dash is detected
                 } else {
                 	morseWord.append("."); // Add dot to list
                 	LCD.drawString(morseWord.toString(), 0, 1);                   
                     dashInProgress = false; // Reset dash in progress
                 } 
             } else if (level[0] == 2.0 && !dashInProgress) {
-                // Only detect dash if not already in progress
-            	morseWord.append("-"); // Add dash to list
-            	LCD.drawString(morseWord.toString(), 0, 1);                
+            	int length = morseWord.length();
+            	if(length > 1) {
+            		morseWord.setLength(0);
+            		morseWord.append("-"); // Add dash to list
+                	LCD.drawString(morseWord.toString(), 0, 1);
+            	}
+                else {
+                		morseWord.replace(length,length+1,"-");
+                		LCD.drawString(morseWord.toString(), 0, 1);
+                }
                 dashInProgress = true; // Set dash in progress when a dash is detected
             } else {
                 dashInProgress = false; // Reset dash in progress if no clap is detected
@@ -130,7 +157,10 @@ public class Driver {
         }
         
 	    String strCommandWord = commandWord.toString();
-	    System.out.print(strCommandWord);
+	    LCD.clear();
+	    LCD.drawString(strCommandWord, 0, 0);
+	    Thread.sleep(2000);
+	    LCD.clear();
 	    
 	    if(strCommandWord.equals("S")) {
 	    	squareCommand(mL, mR, pilot, ANGULAR_SPEED, LINEAR_SPEED);
