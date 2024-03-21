@@ -1,11 +1,13 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import lejos.hardware.Battery;
 import lejos.hardware.Button;
 import lejos.hardware.motor.BaseRegulatedMotor;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.port.MotorPort;
+import lejos.hardware.port.Port;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.lcd.LCD;
 import lejos.robotics.SampleProvider;
@@ -36,7 +38,7 @@ public class Driver {
         Wheel[] wheels = new Wheel[] {wRight, wLeft}; // Corrected the order of wheels
 
         WheeledChassis chassis = new WheeledChassis(wheels, WheeledChassis.TYPE_DIFFERENTIAL);
-        MovePilot pilot = new MovePilot(chassis);
+        final MovePilot pilot = new MovePilot(chassis);
         
     	LCD.drawString("Welcome to Our Morse Code Robot!", 0, 0);
     	LCD.drawString("Authors: Samuel Haddock, Yash Kumar", 0, 1);
@@ -87,20 +89,20 @@ public class Driver {
         boolean dashInProgress = false; // Track whether a dash is in progress
         LCD.drawString("Morse Code Heard:", 0, 0);
         while (true) {
-            if (Button.DOWN.isDown()) {
+            if (Button.LEFT.isDown()) {
                 break;
             }
             
-            if (Button.UP.isDown()) { 
-            	if (morseWord.length() > 0) { 
-            		morseWord.setLength(morseWord.length()-2);
-            		LCD.clear();
-            		LCD.drawString("Morse Code Heard:", 0, 0);
-                    LCD.drawString(commandWord.toString(),0,2);
+            if (Button.UP.isDown()) {
+                if (morseWord.length() > 0) {
+                    morseWord.deleteCharAt(morseWord.length() - 1); // Delete the last character
+                    LCD.clear();
+                    LCD.drawString("Morse Code Heard:", 0, 0);
+                    LCD.drawString(commandWord.toString(), 0, 2);
                     LCD.drawString(morseWord.toString(), 0, 1);
-            	}
+                }
             }
-                              	
+                           	
             clap.fetchSample(level, 0);
             if (Button.ENTER.isDown()){
                 // If no sound is detected for 3 seconds, save all the dots and dashes as a word
@@ -123,32 +125,30 @@ public class Driver {
                 Thread.sleep(300); // Wait for potential second clap within dash time gap
                 clap.fetchSample(level, 0); // Fetch sample again
                 if (level[0] == 2.0) {
-                	int length = morseWord.length();
-                	if(length > 1) {
-                		morseWord.setLength(0);
-	                	morseWord.append("-"); // Add dash to list
-	                	LCD.drawString(morseWord.toString(), 0, 1);
-                	}
-	                else {
-	                		morseWord.replace(length,length+1,"-");
-	                		LCD.drawString(morseWord.toString(), 0, 1);
-	                }
-	                dashInProgress = true; // Set dash in progress when a dash is detected
+                    int length = morseWord.length();
+                    if (length == 0) {
+                        morseWord.setLength(0);
+                        morseWord.append("-"); // Add dash to list
+                        LCD.drawString(morseWord.toString(), 0, 1);
+                    } else {
+                        morseWord.replace(length - 1, length, "-"); // Replace last character with "-"
+                        LCD.drawString(morseWord.toString(), 0, 1);
+                    }
+                    dashInProgress = true; // Set dash in progress when a dash is detected
                 } else {
-                	morseWord.append("."); // Add dot to list
-                	LCD.drawString(morseWord.toString(), 0, 1);                   
+                    morseWord.append("."); // Add dot to list
+                    LCD.drawString(morseWord.toString(), 0, 1);
                     dashInProgress = false; // Reset dash in progress
                 } 
             } else if (level[0] == 2.0 && !dashInProgress) {
-            	int length = morseWord.length();
-            	if(length > 1) {
-            		morseWord.setLength(0);
-            		morseWord.append("-"); // Add dash to list
-                	LCD.drawString(morseWord.toString(), 0, 1);
-            	}
-                else {
-                		morseWord.replace(length,length+1,"-");
-                		LCD.drawString(morseWord.toString(), 0, 1);
+                int length = morseWord.length();
+                if (length == 0) {
+                    morseWord.setLength(0);
+                    morseWord.append("-"); // Add dash to list
+                    LCD.drawString(morseWord.toString(), 0, 1);
+                } else {
+                    morseWord.replace(length - 1, length, "-"); // Replace last character with "-"
+                    LCD.drawString(morseWord.toString(), 0, 1);
                 }
                 dashInProgress = true; // Set dash in progress when a dash is detected
             } else {
@@ -156,82 +156,143 @@ public class Driver {
             }
         }
         
-	    String strCommandWord = commandWord.toString();
-	    LCD.clear();
-	    LCD.drawString(strCommandWord, 0, 0);
-	    Thread.sleep(2000);
-	    LCD.clear();
-	    
-	    if(strCommandWord.equals("S")) {
-	    	squareCommand(mL, mR, pilot, ANGULAR_SPEED, LINEAR_SPEED);
-	    }
-	    else if(strCommandWord.equals("F")) {
-	        freeRoamCommand(mR, mR, pilot);
-	    }
-	    else if(strCommandWord.equals("C")) {
-	        circleCommand(mL, mR);
-	    }
-	    else if(strCommandWord.equals("D")) {
-	        danceCommand(mL, mR);
-	    }
-	    else {
-	    	System.out.print("No Command found!");
+        String strCommandWord = commandWord.toString();
+        LCD.clear();
+        LCD.drawString(strCommandWord, 0, 0);
+        Thread.sleep(2000);
+        LCD.clear();
+
+        Thread squareThread = null;
+        Thread freeRoamThread = null;
+        Thread circleThread = null;
+        Thread danceThread = null;
+
+        Thread backupThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new Backup(SensorPort.S3, pilot).action();
+            }
+        });
+        backupThread.start();
+
+
+        Thread lowBatteryThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new LowBattery().action();
+            }
+        });
+        lowBatteryThread.start();
+
+
+        Thread darkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new DarkChecker(pilot, SensorPort.S1).action();
+            }
+        });
+        darkThread.start();
+
+        
+        Thread.sleep(4000);
+        if (strCommandWord.equals("SQ")) {
+            squareThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    squareCommand(mL, mR, pilot, ANGULAR_SPEED, LINEAR_SPEED);
+                }
+            });
+            squareThread.start();
+        } else if (strCommandWord.equals("FR")) {
+            freeRoamThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    freeRoamCommand(mR, mR, pilot);
+                }
+            });
+            freeRoamThread.start();
+        } else if (strCommandWord.equals("CI")) {
+            circleThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        circleCommand(mL, mR);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            circleThread.start();
+        } else if (strCommandWord.equals("DA")) {
+            danceThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    danceCommand(mL, mR);
+                }
+            });
+            danceThread.start();
+        } else {
+            System.out.print("No Command found!");
+        }
+
+        // Wait for the corresponding thread to finish
+        if (squareThread != null) {
+            squareThread.join();
+        } else if (freeRoamThread != null) {
+            freeRoamThread.join();
+        } else if (circleThread != null) {
+            circleThread.join();
+        } else if (danceThread != null) {
+            danceThread.join();
         }
         
-	    Thread.sleep(3000);
+        Thread.sleep(3000);
         mL.close();
         mR.close();
-
-        /*Behavior forwardBehavior = new Trundle(pilot);
-        Behavior avoidWallBehavior = new Backup(SensorPort.S3, pilot);
-        Behavior lowBatteryBehavior = new LowBattery();
-        Behavior darkChecker = new DarkChecker(pilot, SensorPort.S1);
-        Behavior[] behaviors = {avoidWallBehavior, lowBatteryBehavior, darkChecker};
-        Arbitrator arbitrator = new Arbitrator(behaviors);
-
-        while (!Button.ENTER.isDown()) {
-            arbitrator.go();
-        }
-
-        // Stop the arbitrator and close the sound sensor when the enter button is pressed
-        arbitrator.stop();
-        soundSensor.close();*/
     }
 
     public static void squareCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot, float ANGULAR_SPEED, float LINEAR_SPEED) { // Fixed method name
     	LCD.drawString("Running square command...", 0, 0);
         for (int side = 0; side < 4; side++) {
+        	if(Button.ENTER.isDown()) {
+			    break;
+		    }
             pilot.setAngularSpeed(ANGULAR_SPEED);
             pilot.setLinearSpeed(LINEAR_SPEED);
             pilot.travel(500);
-            pilot.rotate(275); // Changed the angle to make a square
+            pilot.rotate(290); // Changed the angle to make a square
         }
     }
 
-    public static void circleCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) {
-	    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
-	    mL.setSpeed(720);
-	    mR.setSpeed(180);
-	    
-	    while (!Button.ENTER.isDown()) {
-		    if(Button.ENTER.isDown()) {
-			    break;
-		    }
-		    mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
-		    mL.startSynchronization();
-		    
-		    mL.forward();
-		    mR.forward();
-		    
-		    mL.endSynchronization();
-		    mL.stop();
-		    mR.stop();
-	    }
-	    mL.close();
-	    mR.close();
+    public static void circleCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR) throws InterruptedException {
+        mL.synchronizeWith(new BaseRegulatedMotor[] {mR});
+        mL.setSpeed(1080);
+        mR.setSpeed(360);
+        
+        // Start the motors
+        mL.forward();
+        mR.forward();
+
+        // Set the start time
+        long startTime = System.currentTimeMillis();
+
+        // Run the motors for 4 seconds
+        while (System.currentTimeMillis() - startTime < 4000) {
+            if (Button.ENTER.isDown()) {
+                break;
+            }
+        }
+
+        // Stop the motors
+        mL.stop();
+        mR.stop();
+
+        mL.close();
+        mR.close();
     }
 
     public static void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot ) {
+    	LCD.drawString("Running free roam command...", 0, 0);
     	Behavior backupBehavior = new Backup(SensorPort.S3, pilot);
 	
     	long startTime = System.currentTimeMillis();
@@ -264,15 +325,13 @@ public class Driver {
 	    mR.setSpeed(600);
 	    
 	    while (!Button.ENTER.isDown()) {
-		    for (int i = 0; i < 3; i++) {
+		    for (int i = 0; i < 2; i++) {
 		    	if(Button.ENTER.isDown()) {
 		    		break;
 		    	}
 			    mL.rotate(360); 
 			    mL.startSynchronization();
 			    
-			    mL.forward();
-			    mR.forward();
 			    
 			    mL.rotate(720);
 			    mR.rotate(720);
@@ -280,8 +339,6 @@ public class Driver {
 			    mL.backward();
 			    mR.forward();				
 			    
-			    mL.forward();
-			    mR.forward();
 			    
 			    mL.rotate(540);
 			    mR.rotate(360);
@@ -289,14 +346,10 @@ public class Driver {
 			    mL.rotate(720);
 			    mR.rotate(1080);
 
-			    mL.forward();
-			    mR.backward();
 
-			     mL.rotate(600);
+			    mL.rotate(600);
 			    mR.rotate(900);
 
-			    mL.forward();
-			    mR.backward();
 			    
 			    mL.rotate(1080);
 			    mR.rotate(540);
@@ -304,8 +357,6 @@ public class Driver {
 			    mL.rotate(720);
 			    mR.rotate(1080);
 			    
-			    mL.backward();
-			    mR.forward();
 			    
 			    mL.endSynchronization();
 			    mL.waitComplete();

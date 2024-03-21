@@ -13,7 +13,7 @@ public class Backup implements Behavior {
     private Random random;
 
     public Backup(Port sensorPort, MovePilot pilot) {
-    	this.ultrasonicSensor = new EV3UltrasonicSensor(SensorPort.S3);
+    	this.ultrasonicSensor = new EV3UltrasonicSensor(sensorPort);
         this.sample = new float[ultrasonicSensor.sampleSize()];
         this.pilot = pilot;
         this.random = new Random();

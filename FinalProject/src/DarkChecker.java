@@ -37,12 +37,6 @@ public class DarkChecker implements Behavior {
     public void action() {
         suppressed = false;
         colorSensor.fetchSample(sample, 0);
-        float lightLevel = sample[0];
-        if (lightLevel < 0.5) {
-            System.out.println("Dark");
-        } else {
-            System.out.println("Light");
-        }
         // Set desired speed based on conditions
         pilot.setLinearSpeed(200); // Example speed setting, adjust as needed
     }
