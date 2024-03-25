@@ -202,7 +202,7 @@ public class Driver {
         BluetoothThread.start();
 
         
-        Thread.sleep(4000);
+        Thread.sleep(5000);
         if (strCommandWord.equals("SQ")) {
             squareThread = new Thread(new Runnable() {
                 @Override
@@ -254,9 +254,11 @@ public class Driver {
             danceThread.join();
         }
         
-        Thread.sleep(3000);
+        
         mL.close();
         mR.close();
+        
+        System.exit(0);
     }
 
     public static void squareCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot, float ANGULAR_SPEED, float LINEAR_SPEED) { // Fixed method name
@@ -268,7 +270,7 @@ public class Driver {
             pilot.setAngularSpeed(ANGULAR_SPEED);
             pilot.setLinearSpeed(LINEAR_SPEED);
             pilot.travel(500);
-            pilot.rotate(290); // Changed the angle to make a square
+            pilot.rotate(280); // Changed the angle to make a square
         }
     }
 
@@ -333,7 +335,7 @@ public class Driver {
 	    mR.setSpeed(600);
 	    
 	    while (!Button.ENTER.isDown()) {
-		    for (int i = 0; i < 2; i++) {
+		    for (int i = 0; i < 5; i++) {
 		    	if(Button.ENTER.isDown()) {
 		    		break;
 		    	}
