@@ -303,7 +303,6 @@ public class Driver {
 
     public static void freeRoamCommand(BaseRegulatedMotor mL, BaseRegulatedMotor mR, MovePilot pilot ) {
     	LCD.drawString("Running free roam command...", 0, 0);
-    	Behavior backupBehavior = new Backup(SensorPort.S3, pilot);
 	
     	long startTime = System.currentTimeMillis();
         long elapsedTime = 0;
