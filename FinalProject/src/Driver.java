@@ -192,6 +192,14 @@ public class Driver {
             }
         });
         darkThread.start();
+        
+        Thread BluetoothThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new BluetoothCheck().action();
+            }
+        });
+        BluetoothThread.start();
 
         
         Thread.sleep(4000);
