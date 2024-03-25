@@ -307,16 +307,11 @@ public class Driver {
     	long startTime = System.currentTimeMillis();
         long elapsedTime = 0;
 
-        while (elapsedTime < 60000) {
+        while (elapsedTime < 20000) {
         	if(Button.ENTER.isDown()) {
         		break;
         	}
-            if (backupBehavior.takeControl()) {
-                backupBehavior.action();
-            } else {
-                pilot.forward();
-            }
-
+            pilot.forward();
             elapsedTime = System.currentTimeMillis() - startTime;
         }
         
